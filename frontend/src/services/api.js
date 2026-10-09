@@ -14,7 +14,18 @@
 
 import { supabase } from '../lib/supabase';
 
-const BASE = '';
+// Production API origin. Vercel provides VITE_API_URL; local dev leaves it
+// empty so same-origin requests hit the Vite proxy (see vite.config.js).
+// Accepts either a bare origin ("https://host") or an origin already
+// suffixed with "/api" ("https://host/api") — the "/api" suffix is stripped
+// once so call sites below can always append "/api/...".
+function resolveApiBase() {
+  const raw = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+  if (!raw) return '';
+  return raw.replace(/\/api$/, '');
+}
+
+const BASE = resolveApiBase();
 
 export const AI_NOT_CONFIGURED = 'AI_NOT_CONFIGURED';
 export const NOT_AUTHENTICATED = 'NOT_AUTHENTICATED';

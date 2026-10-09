@@ -20,10 +20,7 @@ router.post('/roadmap', requireAuth, pdfUploadIfMultipart, roadmap);
 
 // Multipart for resume PDF OR JSON with resumeText. pdfUpload handles file validation.
 // Every endpoint accepts both content types so the guided workflow can attach a PDF anywhere.
-router.post('/resume', pdfUploadIfMultipart, resumeAnalysis);
-router.post('/job-match', pdfUploadIfMultipart, jobMatch);
-router.post('/skill-gap', pdfUploadIfMultipart, skillGap);
-router.post('/roadmap', pdfUploadIfMultipart, roadmap);
+// (Auth stays enforced by the routes above — no unauthenticated duplicates.)
 
 // Primary integrated analysis flow (modular endpoints above remain canonical).
 router.post('/full', requireAuth, pdfUploadIfMultipart, unifiedAnalysis);

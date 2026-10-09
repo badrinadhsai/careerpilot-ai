@@ -43,12 +43,32 @@ export default function Analyze() {
     setHistError('');
     try {
       setHistory(await listAnalyses(10));
-    } catch {
+    } catch (err) {
+      // Log non-sensitive diagnostics (status/code/message only); the UI
+      // keeps the friendly message so no internals leak to the page.
+      console.error('[CareerPilot] analysis history failed', {
+        status: err?.status,
+        code: err?.code,
+        message: err?.message
+      });
       setHistError('Could not load your analysis history.');
     } finally {
       setHistLoading(false);
     }
   }, [user]);
+
+  const viewStored = React.useCallback(async (id) => {
+    try {
+      const row = await getAnalysis(id);
+      if (row?.full_result) {
+        setResult({ analysis: row.full_result });
+        setStep(4);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch {
+      setHistError('Could not open that analysis.');
+    }
+  }, []);
 
   // Clear user-specific state on account switch so User B never sees User A's data.
   React.useEffect(() => {
@@ -126,20 +146,7 @@ export default function Analyze() {
               const n = i + 1;
               const done = result?.analysis ? true : step > n || loading;
               const on = step === n && !loading && !result;
-  async function viewStored(id) {
-    try {
-      const row = await getAnalysis(id);
-      if (row?.full_result) {
-        setResult({ analysis: row.full_result });
-        setStep(4);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } catch {
-      setHistError('Could not open that analysis.');
-    }
-  }
-
-  return (
+              return (
                 <React.Fragment key={label}>
                   <span className="flow-rail__node" role="listitem" data-on={on} data-done={done} aria-current={on ? 'step' : undefined}>
                     <span className="flow-rail__num">{done && !on ? '✓' : String(n).padStart(2, '0')}</span>
